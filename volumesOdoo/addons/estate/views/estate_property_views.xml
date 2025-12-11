@@ -1,52 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Property Actions -->
+    <!-- 
+    VISTAS PARA EL MODELO estate.property (Propiedades Inmobiliarias)
+    Define la acción y las diferentes vistas (lista, formulario, búsqueda) 
+    para gestionar las propiedades inmobiliarias
+    -->
+    
+    <!-- 
+    Acción de ventana que abre la vista de propiedades 
+    Permite acceder a la lista de propiedades mostrando lista y formulario
+    -->
     <record id="estate_property" model="ir.actions.act_window">
         <field name="name">Properties</field>
         <field name="res_model">estate.property</field>
         <field name="view_mode">list,form</field>
     </record>
 
+    <!-- 
+    VISTA DE LISTA (tree view) para estate.property
+    Muestra todas las propiedades en formato tabla con las columnas principales
+    -->
     <record id="view_estate_property_list" model="ir.ui.view">
         <field name="name">estate.property.list</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <list string="Properties">
+                <!-- Título/nombre de la propiedad -->
                 <field name="name"/>
+                <!-- Tipo de propiedad (Casa, Apartamento, etc.) -->
                 <field name="property_type_id"/>
+                <!-- Etiquetas asociadas mostradas como tags -->
                 <field name="tag_ids" widget="many2many_tags"/>
+                <!-- Ubicación -->
                 <field name="postcode"/>
+                <!-- Características principales -->
                 <field name="bedrooms"/>
                 <field name="living_area"/>
+                <!-- Precios -->
                 <field name="expected_price"/>
                 <field name="selling_price"/>
+                <!-- Disponibilidad -->
                 <field name="date_availability"/>
             </list>
         </field>
     </record>
 
+    <!-- 
+    VISTA DE FORMULARIO para estate.property
+    Muestra el detalle completo de una propiedad en un formulario
+    Organizada en secciones (sheet) y pestañas (notebook)
+    -->
     <record id="view_estate_property_form" model="ir.ui.view">
         <field name="name">estate.property.form</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Property">
                 <sheet>
+                    <!-- Encabezado con el título de la propiedad -->
                     <h1>
                         <field name="name" class="oe_inline"/>
                     </h1>
+                    <!-- Información general en dos columnas -->
                     <group>
+                        <!-- Primera columna: clasificación y ubicación -->
                         <group>
+                            <field name="tag_ids" widget="many2many_tags"/>
                             <field name="property_type_id"/>
                             <field name="postcode"/>
                             <field name="date_availability"/>
                         </group>
+                        <!-- Segunda columna: precios -->
                         <group>
                             <field name="expected_price"/>
                             <field name="selling_price"/>
                         </group>
                     </group>
-                    <field name="tag_ids" widget="many2many_tags"/>
+                    <!-- Pestañas con información adicional -->
                     <notebook>
+                        <!-- Pestaña 1: Descripción y características físicas -->
                         <page name="description" string="Description">
                             <group>
                                 <field name="description"/>
@@ -59,9 +90,11 @@
                                 <field name="garden_orientation"/>
                             </group>
                         </page>
+                        <!-- Pestaña 2: Ofertas recibidas para esta propiedad -->
                         <page name="offers" string="Offers">
                             <field name="offer_ids"/>
                         </page>
+                        <!-- Pestaña 3: Información adicional (comprador y vendedor) -->
                         <page name="other_info" string="Other Info">
                             <group>
                                 <group>
@@ -76,18 +109,26 @@
         </field>
     </record>
 
+    <!-- 
+    VISTA DE BÚSQUEDA para estate.property
+    Define campos buscables y filtros para facilitar la búsqueda de propiedades
+    -->
     <record id="view_estate_property_search" model="ir.ui.view">
         <field name="name">estate.property.search</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <search string="Properties">
+                <!-- Campos de búsqueda por texto -->
                 <field name="name"/>
                 <field name="postcode"/>
                 <field name="expected_price"/>
+                <!-- Campos de búsqueda por número -->
                 <field name="bedrooms"/>
                 <field name="living_area"/>
                 <field name="facades"/>
+                <!-- Filtro predefinido: propiedades disponibles (sin vender) -->
                 <filter name="available" domain="[('state', 'in', ['new', 'offer_received'])]" string="Available"/>
+                <!-- Agrupación: agrupar resultados por código postal -->
                 <filter name="postcode_group" context="{'group_by': 'postcode'}" string="Group by Postcode"/>
             </search>
         </field>

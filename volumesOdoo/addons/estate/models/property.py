@@ -2,30 +2,79 @@ from odoo import fields, models
 
 
 class EstateProperty(models.Model):
+    """
+    Modelo principal que representa una propiedad inmobiliaria.
+    Almacena toda la información relacionada con una propiedad,
+    sus características y su estado en el proceso de venta.
+    """
+
     _name = "estate.property"
     _description = "Propiedad Inmobiliaria"
 
+    # Campo de nombre de la propiedad
     name = fields.Char(string="Título", required=True)
-    property_type_id = fields.Many2one("estate.property.type", string="Tipo de Propiedad")
+
+    # Relación many2one con el tipo de propiedad
+    property_type_id = fields.Many2one(
+        "estate.property.type", string="Tipo de Propiedad"
+    )
+
+    # Relación many2many con etiquetas (una propiedad puede tener varias etiquetas)
     tag_ids = fields.Many2many("estate.property.tag", string="Etiquetas")
-    offer_ids = fields.One2many("estate.property.offer", "property_id", string="Ofertas")
+
+    # Relación one2many con las ofertas recibidas (una propiedad puede tener varias ofertas)
+    offer_ids = fields.One2many(
+        "estate.property.offer", "property_id", string="Ofertas"
+    )
+
+    # Comprador asociado a la propiedad (no se copia al duplicar registros)
     buyer_id = fields.Many2one("res.partner", string="Comprador", copy=False)
-    seller_id = fields.Many2one("res.users", string="Vendedor", default=lambda self: self.env.user)
+
+    # Vendedor (asignado automáticamente al usuario actual por defecto)
+    seller_id = fields.Many2one(
+        "res.users",
+        string="Vendedor",
+        default=lambda self: self.env.user,  # la funcion labda devuelve el usuario actual
+    )
+
+    # Descripción la propiedad
     description = fields.Text(string="Descripción")
+
+    # Código postal
     postcode = fields.Char(string="Código Postal")
+
+    # Fecha a partir de la cual la propiedad está disponible
     date_availability = fields.Date(
         string="Fecha de Disponibilidad",
         copy=False,
         default=fields.Date.today(),
     )
+
+    # Precio solicitado por el vendedor
     expected_price = fields.Float(string="Precio Esperado", required=True)
+
+    # Precio final de venta (solo lectura, se actualiza cuando se vende)
     selling_price = fields.Float(string="Precio de Venta", readonly=True, copy=False)
+
+    # Número de dormitorios (por defecto 2)
     bedrooms = fields.Integer(string="Dormitorios", default=2)
+
+    # Área de la vivienda en metros cuadrados
     living_area = fields.Integer(string="Área de Vivienda (m²)")
+
+    # Número de fachadas
     facades = fields.Integer(string="Fachadas")
+
+    # Indicador si tiene garaje
     garage = fields.Boolean(string="Garaje")
+
+    # Indicador si tiene jardín
     garden = fields.Boolean(string="Jardín")
+
+    # Área del jardín en metros cuadrados
     garden_area = fields.Integer(string="Área de Jardín (m²)")
+
+    # Orientación del jardín (Norte, Sur, Este, Oeste)
     garden_orientation = fields.Selection(
         selection=[
             ("north", "Norte"),
@@ -35,7 +84,11 @@ class EstateProperty(models.Model):
         ],
         string="Orientación del Jardín",
     )
+
+    # Indica si la propiedad está activa en el sistema
     active = fields.Boolean(default=True)
+
+    # Estado del proceso de venta: Nuevo, Oferta Recibida, Oferta Aceptada, Vendido, Cancelado
     state = fields.Selection(
         selection=[
             ("new", "Nuevo"),
@@ -50,6 +103,7 @@ class EstateProperty(models.Model):
         default="new",
     )
 
+    # Restricción SQL: el precio esperado debe ser siempre mayor a 0
     _sql_constraints = [
         (
             "check_expected_price",
