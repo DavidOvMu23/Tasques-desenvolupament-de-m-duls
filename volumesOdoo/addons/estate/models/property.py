@@ -7,6 +7,8 @@ class EstateProperty(models.Model):
 
     name = fields.Char(string="Título", required=True)
     property_type_id = fields.Many2one("estate.property.type", string="Tipo de Propiedad")
+    tag_ids = fields.Many2many("estate.property.tag", string="Etiquetas")
+    offer_ids = fields.One2many("estate.property.offer", "property_id", string="Ofertas")
     buyer_id = fields.Many2one("res.partner", string="Comprador", copy=False)
     seller_id = fields.Many2one("res.users", string="Vendedor", default=lambda self: self.env.user)
     description = fields.Text(string="Descripción")
