@@ -1,1 +1,0 @@
-{"context": {"lang": "es_ES", "tz": "Europe/Madrid", "uid": 2}, "create_time": 1765403187.912763, "db": "dev", "debug": "", "login": "admin", "uid": 2, "session_token": "e213c71c7d3379cd14b0a634f39ca99614dfa5bfd63ad7c2950a55d2292f5827", "_trace": [{"platform": "linux", "browser": "chrome", "ip_address": "172.18.0.1", "first_activity": 1765379938, "last_activity": 1765403187}]}

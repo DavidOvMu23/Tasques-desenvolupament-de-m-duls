@@ -6,6 +6,9 @@ class EstateProperty(models.Model):
     _description = "Propiedad Inmobiliaria"
 
     name = fields.Char(string="Título", required=True)
+    property_type_id = fields.Many2one("estate.property.type", string="Tipo de Propiedad")
+    buyer_id = fields.Many2one("res.partner", string="Comprador", copy=False)
+    seller_id = fields.Many2one("res.users", string="Vendedor", default=lambda self: self.env.user)
     description = fields.Text(string="Descripción")
     postcode = fields.Char(string="Código Postal")
     date_availability = fields.Date(

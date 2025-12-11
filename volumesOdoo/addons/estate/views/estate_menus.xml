@@ -1,7 +1,10 @@
 <odoo>
     <menuitem id="menu_raiz_inmobiliaria" name="Real Estate">
-        <menuitem id="menu_categoria_adversiments" name="Advertisements">
-            <menuitem id="menu_propiedades" action="estate_property_action"/>
+        <menuitem id="adversiments" name="Advertisements">
+            <menuitem id="propiedades" action="estate_property"/>
+        </menuitem>
+        <menuitem id="settings" name="Settings">
+            <menuitem id="property_types" action="property_type"/>
         </menuitem>
     </menuitem>
 </odoo>
