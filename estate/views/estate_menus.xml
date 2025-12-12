@@ -1,0 +1,24 @@
+<odoo>
+    <!-- 
+    DEFINICIÓN DE MENÚS PARA EL MÓDULO ESTATE (Real Estate - Inmobiliario)
+    Define la estructura de menús en la interfaz de Odoo para acceder a las diferentes funcionalidades
+    -->
+    
+    <!-- Menú raíz principal del módulo -->
+    <menuitem id="menu_raiz_inmobiliaria" name="Real Estate">
+        
+        <!-- Submenu: Anuncios/Propiedades -->
+        <menuitem id="adversiments" name="Advertisements">
+            <!-- Opción para ver y gestionar propiedades (vinculada a la acción estate_property) -->
+            <menuitem id="propiedades" action="estate_property"/>
+        </menuitem>
+        
+        <!-- Submenu: Configuración/Ajustes -->
+        <menuitem id="settings" name="Settings">
+            <!-- Opción para gestionar tipos de propiedades (Casa, Apartamento, etc.) -->
+            <menuitem id="property_types" action="property_type"/>
+            <!-- Opción para gestionar etiquetas/categorías de propiedades -->
+            <menuitem id="property_tags" action="estate_property_tag"/>
+        </menuitem>
+    </menuitem>
+</odoo>

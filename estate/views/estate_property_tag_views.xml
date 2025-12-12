@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+    VISTAS PARA EL MODELO estate.property.tag (Etiquetas de Propiedades)
+    Define la acción y vistas para gestionar las categorías/etiquetas de propiedades
+    -->
+    
+    <!-- 
+    Acción de ventana que abre la vista de etiquetas
+    Permite acceder a la lista de etiquetas mostrando lista y formulario
+    -->
+    <record id="estate_property_tag" model="ir.actions.act_window">
+        <field name="name">Property Tags</field>
+        <field name="res_model">estate.property.tag</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- 
+    VISTA DE LISTA (tree view) para estate.property.tag
+    Muestra todas las etiquetas disponibles en formato tabla
+    -->
+    <record id="view_estate_property_tag_list" model="ir.ui.view">
+        <field name="name">estate.property.tag.list</field>
+        <field name="model">estate.property.tag</field>
+        <field name="arch" type="xml">
+            <list string="Property Tags">
+                <!-- Nombre de la etiqueta -->
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 
+    VISTA DE FORMULARIO para estate.property.tag
+    Muestra el detalle de una etiqueta individual para crear o editar
+    -->
+    <record id="view_estate_property_tag_form" model="ir.ui.view">
+        <field name="name">estate.property.tag.form</field>
+        <field name="model">estate.property.tag</field>
+        <field name="arch" type="xml">
+            <form string="Property Tag">
+                <sheet>
+                    <group>
+                        <!-- Campo para el nombre de la etiqueta -->
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -39,6 +39,7 @@
                 <!-- Precios -->
                 <field name="expected_price"/>
                 <field name="selling_price"/>
+                <field name="best_price"/>
                 <!-- Disponibilidad -->
                 <field name="date_availability"/>
             </list>
@@ -73,6 +74,7 @@
                         <group>
                             <field name="expected_price"/>
                             <field name="selling_price"/>
+                            <field name="best_price"/>
                         </group>
                     </group>
                     <!-- Pestañas con información adicional -->
@@ -88,6 +90,7 @@
                                 <field name="garden"/>
                                 <field name="garden_area"/>
                                 <field name="garden_orientation"/>
+                                <field name="total_area"/>
                             </group>
                         </page>
                         <!-- Pestaña 2: Ofertas recibidas para esta propiedad -->

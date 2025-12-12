@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class EstateProperty(models.Model):
@@ -111,3 +111,19 @@ class EstateProperty(models.Model):
             "El precio esperado debe ser positivo.",
         ),
     ]
+
+    # Campos calculados
+    total_area = fields.Integer(string="Área Total (m²)", compute="_compute_total_area")
+    best_price = fields.Float(string="Mejor Oferta", compute="_compute_best_price")
+
+    @api.depends("living_area", "garden_area")
+    def _compute_total_area(self):
+        for record in self:
+            record.total_area = (record.living_area or 0) + (record.garden_area or 0)
+
+    @api.depends("offer_ids.price")
+    def _compute_best_price(self):
+        for record in self:
+            record.best_price = (
+                max(record.offer_ids.mapped("price")) if record.offer_ids else 0
+            )

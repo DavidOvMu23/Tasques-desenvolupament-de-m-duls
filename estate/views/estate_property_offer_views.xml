@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 
+    VISTAS PARA EL MODELO estate.property.offer (Ofertas de Propiedades)
+    Define la vista en lista y formulario para gestionar las ofertas de compra
+    -->
+    
+    <!-- 
+    VISTA DE LISTA (tree view) para estate.property.offer
+    Muestra todas las ofertas en formato tabla con información resumida
+    -->
+    <record id="view_estate_property_offer_list" model="ir.ui.view">
+        <field name="name">estate.property.offer.list</field>
+        <field name="model">estate.property.offer</field>
+        <field name="arch" type="xml">
+            <list string="Property Offers">
+                <!-- Precio ofertado por el comprador -->
+                <field name="price"/>
+                <!-- Contacto/comprador que realiza la oferta -->
+                <field name="partner_id"/>
+                <!-- Estado: Aceptada o Rechazada -->
+                <field name="status"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 
+    VISTA DE FORMULARIO para estate.property.offer
+    Muestra el detalle de una oferta individual
+    -->
+    <record id="view_estate_property_offer_form" model="ir.ui.view">
+        <field name="name">estate.property.offer.form</field>
+        <field name="model">estate.property.offer</field>
+        <field name="arch" type="xml">
+            <form string="Property Offer">
+                <sheet>
+                    <!-- Campos principales de la oferta -->
+                    <group>
+                        <!-- Precio ofertado -->
+                        <field name="price"/>
+                        <!-- Información del comprador -->
+                        <field name="partner_id"/>
+                        <!-- Estado de la oferta (Aceptada/Rechazada) -->
+                        <field name="status"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

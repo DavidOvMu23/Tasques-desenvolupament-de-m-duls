@@ -1,0 +1,18 @@
+# Archivo de control de acceso para los modelos del módulo estate
+# Formato: id, nombre, modelo, grupo de usuarios, lectura, escritura, creación, eliminación
+# 
+# Define los permisos que los usuarios del grupo "base.group_user" (usuarios normales) 
+# tienen sobre cada modelo del módulo inmobiliario
+
+# Permisos para el modelo estate.property (propiedades inmobiliarias)
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_estate_property,access_estate_property,model_estate_property,base.group_user,1,1,1,1
+
+# Permisos para el modelo estate.property.type (tipos de propiedades)
+access_estate_property_type,access_estate_property_type,model_estate_property_type,base.group_user,1,1,1,1
+
+# Permisos para el modelo estate.property.tag (etiquetas de propiedades)
+access_estate_property_tag,access_estate_property_tag,model_estate_property_tag,base.group_user,1,1,1,1
+
+# Permisos para el modelo estate.property.offer (ofertas de propiedades)
+access_estate_property_offer,access_estate_property_offer,model_estate_property_offer,base.group_user,1,1,1,1
