@@ -24,6 +24,9 @@
                 <field name="date_deadline"/>
                 <!-- Estado: Aceptada o Rechazada -->
                 <field name="status"/>
+                <!-- Botones de acción -->
+                <button name="action_accept" type="object" icon="fa-check" title="Accept"/>
+                <button name="action_refuse" type="object" icon="fa-times" title="Refuse"/>
             </list>
         </field>
     </record>

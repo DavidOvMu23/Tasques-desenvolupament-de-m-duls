@@ -27,6 +27,8 @@
             <list string="Properties">
                 <!-- Título/nombre de la propiedad -->
                 <field name="name"/>
+                <!-- Estado de la propiedad -->
+                <field name="state"/>
                 <!-- Tipo de propiedad (Casa, Apartamento, etc.) -->
                 <field name="property_type_id"/>
                 <!-- Etiquetas asociadas mostradas como tags -->
@@ -39,6 +41,7 @@
                 <!-- Precios -->
                 <field name="expected_price"/>
                 <field name="selling_price"/>
+                <field name="best_price"/>
                 <!-- Disponibilidad -->
                 <field name="date_availability"/>
             </list>
@@ -55,6 +58,10 @@
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
             <form string="Property">
+                <header>
+                    <button name="action_sold" type="object" string="SOLD" class="btn-primary"/>
+                    <button name="action_cancel" type="object" string="CANCEL"/>
+                </header>
                 <sheet>
                     <!-- Encabezado con el título de la propiedad -->
                     <h1>
@@ -64,6 +71,7 @@
                     <group>
                         <!-- Primera columna: clasificación y ubicación -->
                         <group>
+                            <field name="state" readonly="1"/>
                             <field name="tag_ids" widget="many2many_tags"/>
                             <field name="property_type_id"/>
                             <field name="postcode"/>
@@ -73,6 +81,7 @@
                         <group>
                             <field name="expected_price"/>
                             <field name="selling_price"/>
+                            <field name="best_price"/>
                         </group>
                     </group>
                     <!-- Pestañas con información adicional -->
@@ -88,6 +97,7 @@
                                 <field name="garden"/>
                                 <field name="garden_area"/>
                                 <field name="garden_orientation"/>
+                                <field name="total_area"/>
                             </group>
                         </page>
                         <!-- Pestaña 2: Ofertas recibidas para esta propiedad -->

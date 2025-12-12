@@ -55,4 +55,40 @@ class EstatePropertyOffer(models.Model):
             # Convertir a date si es datetime
             if isinstance(create_date, datetime.datetime):
                 create_date = create_date.date()
-            record.validity = (record.date_deadline - create_date.date()).days
+            record.validity = (record.date_deadline - create_date).days
+
+    def create(self, vals_list):
+        from odoo.exceptions import UserError
+
+        for vals in vals_list:
+            if "property_id" in vals:
+                property_id = self.env["estate.property"].browse(vals["property_id"])
+                if property_id.state == "canceled":
+                    raise UserError("Cannot create offers for canceled properties.")
+        return super().create(vals_list)
+
+    def action_accept(self):
+        from odoo.exceptions import UserError
+
+        for record in self:
+            if record.property_id.state == "canceled":
+                raise UserError("Cannot accept an offer for a canceled property.")
+            record.status = "accepted"
+            record.property_id.buyer_id = record.partner_id
+            record.property_id.selling_price = record.price
+            record.property_id.state = "offer_accepted"
+            # Rechazar todas las otras ofertas de la misma propiedad
+            other_offers = record.property_id.offer_ids.filtered(
+                lambda o: o.id != record.id
+            )
+            other_offers.action_refuse()
+        return True
+
+    def action_refuse(self):
+        from odoo.exceptions import UserError
+
+        for record in self:
+            if record.status == "accepted":
+                raise UserError("Accepted offers cannot be refused.")
+            record.status = "refused"
+        return True

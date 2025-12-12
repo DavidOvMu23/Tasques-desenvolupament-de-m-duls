@@ -128,6 +128,31 @@ class EstateProperty(models.Model):
                 max(record.offer_ids.mapped("price")) if record.offer_ids else 0
             )
 
+    def action_sold(self):
+        from odoo.exceptions import UserError
+
+        for record in self:
+            if record.state == "canceled":
+                raise UserError("Canceled properties cannot be sold.")
+            # Rechazar todas las ofertas que no estén aceptadas
+            for offer in record.offer_ids:
+                if offer.status != "accepted":
+                    offer.status = "refused"
+            record.state = "sold"
+        return True
+
+    def action_cancel(self):
+        from odoo.exceptions import UserError
+
+        for record in self:
+            if record.state == "sold":
+                raise UserError("Sold properties cannot be canceled.")
+            # Rechazar todas las ofertas
+            for offer in record.offer_ids:
+                offer.status = "refused"
+            record.state = "canceled"
+        return True
+
     @api.onchange("garden")
     def _onchange_garden(self):
         if self.garden:
