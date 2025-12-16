@@ -56,6 +56,7 @@ class EstatePropertyOffer(models.Model):
         inverse="_inverse_date_deadline",
     )
 
+    # Cálculo de la fecha límite basada en la fecha de creación y validez
     @api.depends("create_date", "validity")
     def _compute_date_deadline(self):
         """
@@ -69,6 +70,7 @@ class EstatePropertyOffer(models.Model):
                 create_date = create_date.date()
             record.date_deadline = create_date + timedelta(days=record.validity)
 
+    # Función inversa para actualizar la validez al modificar la fecha límite
     def _inverse_date_deadline(self):
         """
         Función inversa que recalcula los días de validez cuando se
@@ -81,6 +83,7 @@ class EstatePropertyOffer(models.Model):
                 create_date = create_date.date()
             record.validity = (record.date_deadline - create_date).days
 
+    # Sobrescribe el método create para agregar validaciones y cambios de estado (esto me lo ha hecho el chat gpt, por que no lo consegía)
     def create(self, vals_list):
         """
         Sobrescribe el método create para:
@@ -108,6 +111,7 @@ class EstatePropertyOffer(models.Model):
                     property_id.state = "offer_received"
         return super().create(vals_list)
 
+    # Acción para aceptar la oferta (esto me lo ha hecho el chat gpt, por que no lo consegía)
     def action_accept(self):
         """
         Acepta la oferta y realiza las siguientes acciones:
@@ -130,6 +134,7 @@ class EstatePropertyOffer(models.Model):
             other_offers.action_refuse()
         return True
 
+    # Acción para rechazar la oferta
     def action_refuse(self):
         """
         Rechaza la oferta.

@@ -31,6 +31,7 @@ class EstatePropertyType(models.Model):
         string="Número de Ofertas", compute="_compute_offer_count"
     )
 
+    # Cálculo del número de ofertas
     @api.depends("offer_ids")
     def _compute_offer_count(self):
         """

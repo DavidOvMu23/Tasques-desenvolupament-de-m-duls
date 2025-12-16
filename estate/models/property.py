@@ -1,4 +1,6 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools.float_utils import float_compare
 
 
 class EstateProperty(models.Model):
@@ -10,6 +12,7 @@ class EstateProperty(models.Model):
 
     _name = "estate.property"
     _description = "Propiedad Inmobiliaria"
+    _order = "id desc"
 
     # Campo de nombre de la propiedad
     name = fields.Char(string="Título", required=True)
@@ -103,14 +106,51 @@ class EstateProperty(models.Model):
         default="new",
     )
 
-    # Restricción SQL: el precio esperado debe ser siempre mayor a 0
-    _sql_constraints = [
-        (
-            "check_expected_price",
-            "CHECK(expected_price > 0)",
-            "El precio esperado debe ser positivo.",
-        ),
-    ]
+    # Restricciones SQL (Odoo 19)
+    _check_expected_price = models.Constraint(
+        "CHECK(expected_price > 0)",
+        "El precio esperado debe ser estrictamente positivo.",
+    )
+    _check_selling_price = models.Constraint(
+        "CHECK(selling_price >= 0)",
+        "El precio de venta debe ser positivo.",
+    )
+    _check_bedrooms = models.Constraint(
+        "CHECK(bedrooms >= 0)",
+        "El número de dormitorios debe ser positivo.",
+    )
+    _check_living_area = models.Constraint(
+        "CHECK(living_area >= 0)",
+        "El área de vivienda debe ser positiva.",
+    )
+    _check_facades = models.Constraint(
+        "CHECK(facades >= 0)",
+        "El número de fachadas debe ser positivo.",
+    )
+    _check_garden_area = models.Constraint(
+        "CHECK(garden_area >= 0)",
+        "El área de jardín debe ser positiva.",
+    )
+
+    # Restricción Python: el precio de venta no puede ser inferior al 90% del precio esperado
+    @api.constrains("selling_price", "expected_price")
+    def _check_selling_price_percentage(self):
+        """
+        Valida que el precio de venta sea al menos el 90% del precio esperado.
+        Utiliza float_compare para evitar problemas de precisión con decimales.
+        """
+        for record in self:
+            # Solo validar si hay precio de venta (no es 0)
+            if record.selling_price > 0:
+                min_price = record.expected_price * 0.90
+                if (
+                    float_compare(record.selling_price, min_price, precision_digits=2)
+                    < 0
+                ):
+                    raise ValidationError(
+                        "El precio de venta no puede ser inferior al 90%% del precio esperado (%.2f)."
+                        % min_price
+                    )
 
     # Campos calculados
     total_area = fields.Integer(string="Área Total (m²)", compute="_compute_total_area")
@@ -118,19 +158,28 @@ class EstateProperty(models.Model):
 
     @api.depends("living_area", "garden_area")
     def _compute_total_area(self):
+        """
+        Calcula el área total sumando el área de vivienda y el área de jardín.
+        """
         for record in self:
             record.total_area = (record.living_area or 0) + (record.garden_area or 0)
 
     @api.depends("offer_ids.price")
     def _compute_best_price(self):
+        """
+        Calcula la mejor oferta (precio más alto) entre todas las ofertas recibidas.
+        Retorna 0 si no hay ofertas.
+        """
         for record in self:
             record.best_price = (
                 max(record.offer_ids.mapped("price")) if record.offer_ids else 0
             )
 
     def action_sold(self):
-        from odoo.exceptions import UserError
-
+        """
+        Marca la propiedad como vendida.
+        Valida que no esté cancelada y rechaza todas las ofertas no aceptadas.
+        """
         for record in self:
             if record.state == "canceled":
                 raise UserError("Canceled properties cannot be sold.")
@@ -142,8 +191,10 @@ class EstateProperty(models.Model):
         return True
 
     def action_cancel(self):
-        from odoo.exceptions import UserError
-
+        """
+        Cancela la propiedad.
+        Valida que no esté vendida y rechaza todas las ofertas pendientes.
+        """
         for record in self:
             if record.state == "sold":
                 raise UserError("Sold properties cannot be canceled.")
@@ -153,8 +204,26 @@ class EstateProperty(models.Model):
             record.state = "canceled"
         return True
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_new_or_canceled(self):
+        """
+        Previene la eliminación de propiedades que no estén en estado 'new' o 'canceled'.
+        Solo se pueden eliminar propiedades nuevas o canceladas.
+        """
+        for record in self:
+            if record.state not in ["new", "canceled"]:
+                raise UserError(
+                    "Solo se pueden eliminar propiedades en estado Nuevo o Cancelado."
+                )
+
     @api.onchange("garden")
     def _onchange_garden(self):
+        """
+        Al activar el jardín, establece valores por defecto:
+        - Área de jardín: 10 m²
+        - Orientación: Norte
+        Al desactivarlo, limpia los valores.
+        """
         if self.garden:
             self.garden_area = 10
             self.garden_orientation = "north"

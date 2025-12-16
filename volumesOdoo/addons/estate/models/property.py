@@ -106,7 +106,7 @@ class EstateProperty(models.Model):
         default="new",
     )
 
-    # Restricciones SQL (Odoo 19)
+    # Restricciones SQL
     _check_expected_price = models.Constraint(
         "CHECK(expected_price > 0)",
         "El precio esperado debe ser estrictamente positivo.",
@@ -137,7 +137,6 @@ class EstateProperty(models.Model):
     def _check_selling_price_percentage(self):
         """
         Valida que el precio de venta sea al menos el 90% del precio esperado.
-        Utiliza float_compare para evitar problemas de precisión con decimales.
         """
         for record in self:
             # Solo validar si hay precio de venta (no es 0)
@@ -156,6 +155,7 @@ class EstateProperty(models.Model):
     total_area = fields.Integer(string="Área Total (m²)", compute="_compute_total_area")
     best_price = fields.Float(string="Mejor Oferta", compute="_compute_best_price")
 
+    # Cálculo del area total
     @api.depends("living_area", "garden_area")
     def _compute_total_area(self):
         """
@@ -164,6 +164,7 @@ class EstateProperty(models.Model):
         for record in self:
             record.total_area = (record.living_area or 0) + (record.garden_area or 0)
 
+    # Cálculo de la mejor oferta
     @api.depends("offer_ids.price")
     def _compute_best_price(self):
         """
@@ -175,6 +176,7 @@ class EstateProperty(models.Model):
                 max(record.offer_ids.mapped("price")) if record.offer_ids else 0
             )
 
+    # Acciones para cambiar el estado de la propiedad
     def action_sold(self):
         """
         Marca la propiedad como vendida.
@@ -190,6 +192,7 @@ class EstateProperty(models.Model):
             record.state = "sold"
         return True
 
+    # Acción para cancelar la propiedad
     def action_cancel(self):
         """
         Cancela la propiedad.
@@ -204,6 +207,7 @@ class EstateProperty(models.Model):
             record.state = "canceled"
         return True
 
+    # Eliminar solo si está en estado 'new' o 'canceled'
     @api.ondelete(at_uninstall=False)
     def _unlink_if_new_or_canceled(self):
         """
@@ -216,6 +220,7 @@ class EstateProperty(models.Model):
                     "Solo se pueden eliminar propiedades en estado Nuevo o Cancelado."
                 )
 
+    # Cambio automático al activar/desactivar el jardín
     @api.onchange("garden")
     def _onchange_garden(self):
         """
