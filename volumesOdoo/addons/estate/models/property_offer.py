@@ -85,6 +85,7 @@ class EstatePropertyOffer(models.Model):
         """
         Sobrescribe el método create para:
         - Validar que no se creen ofertas para propiedades canceladas
+        - Validar que el precio de la oferta no sea inferior a ofertas existentes
         - Cambiar el estado de la propiedad a "offer_received" cuando recibe su primera oferta
         """
         for vals in vals_list:
@@ -92,6 +93,16 @@ class EstatePropertyOffer(models.Model):
                 property_id = self.env["estate.property"].browse(vals["property_id"])
                 if property_id.state == "canceled":
                     raise UserError("Cannot create offers for canceled properties.")
+
+                # Validar que el precio no sea inferior a ofertas existentes
+                if "price" in vals and property_id.offer_ids:
+                    existing_prices = property_id.offer_ids.mapped("price")
+                    if existing_prices and vals["price"] < max(existing_prices):
+                        raise UserError(
+                            "El precio de la oferta no puede ser inferior a una oferta existente (%.2f)."
+                            % max(existing_prices)
+                        )
+
                 # Cambiar estado a "offer_received" cuando se crea una oferta
                 if property_id.state == "new":
                     property_id.state = "offer_received"

@@ -204,6 +204,18 @@ class EstateProperty(models.Model):
             record.state = "canceled"
         return True
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_if_new_or_canceled(self):
+        """
+        Previene la eliminación de propiedades que no estén en estado 'new' o 'canceled'.
+        Solo se pueden eliminar propiedades nuevas o canceladas.
+        """
+        for record in self:
+            if record.state not in ["new", "canceled"]:
+                raise UserError(
+                    "Solo se pueden eliminar propiedades en estado Nuevo o Cancelado."
+                )
+
     @api.onchange("garden")
     def _onchange_garden(self):
         """
