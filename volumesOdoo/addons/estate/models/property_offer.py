@@ -2,6 +2,7 @@ import datetime
 from datetime import timedelta
 
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class EstatePropertyOffer(models.Model):
@@ -12,9 +13,16 @@ class EstatePropertyOffer(models.Model):
 
     _name = "estate.property.offer"
     _description = "Oferta de Propiedad Inmobiliaria"
+    _order = "price desc"
 
     # Precio que ofrece el comprador por la propiedad
     price = fields.Float(string="Precio")
+
+    # Restricción SQL: precio debe ser estrictamente positivo (Odoo 19)
+    _check_price = models.Constraint(
+        "CHECK(price > 0)",
+        "El precio de la oferta debe ser estrictamente positivo.",
+    )
 
     # Estado de la oferta
     status = fields.Selection(
@@ -31,6 +39,14 @@ class EstatePropertyOffer(models.Model):
 
     # Relación many2one con la propiedad sobre la cual se realiza la oferta
     property_id = fields.Many2one("estate.property", string="Propiedad", required=True)
+
+    # Campo relacionado: tipo de propiedad (almacenado para búsquedas eficientes)
+    property_type_id = fields.Many2one(
+        "estate.property.type",
+        related="property_id.property_type_id",
+        string="Tipo de Propiedad",
+        store=True,
+    )
 
     # Campos para validez y fecha límite
     validity = fields.Integer(string="Validez (días)", default=7)
@@ -58,25 +74,24 @@ class EstatePropertyOffer(models.Model):
             record.validity = (record.date_deadline - create_date).days
 
     def create(self, vals_list):
-        from odoo.exceptions import UserError
-
         for vals in vals_list:
             if "property_id" in vals:
                 property_id = self.env["estate.property"].browse(vals["property_id"])
                 if property_id.state == "canceled":
                     raise UserError("Cannot create offers for canceled properties.")
+                # Cambiar estado a "offer_received" cuando se crea una oferta
+                if property_id.state == "new":
+                    property_id.state = "offer_received"
         return super().create(vals_list)
 
     def action_accept(self):
-        from odoo.exceptions import UserError
-
         for record in self:
             if record.property_id.state == "canceled":
                 raise UserError("Cannot accept an offer for a canceled property.")
             record.status = "accepted"
             record.property_id.buyer_id = record.partner_id
             record.property_id.selling_price = record.price
-            record.property_id.state = "offer_accepted"
+            record.property_id.state = "sold"
             # Rechazar todas las otras ofertas de la misma propiedad
             other_offers = record.property_id.offer_ids.filtered(
                 lambda o: o.id != record.id
@@ -85,10 +100,9 @@ class EstatePropertyOffer(models.Model):
         return True
 
     def action_refuse(self):
-        from odoo.exceptions import UserError
-
         for record in self:
             if record.status == "accepted":
+                raise UserError("Accepted offers cannot be refused.")
                 raise UserError("Accepted offers cannot be refused.")
             record.status = "refused"
         return True
