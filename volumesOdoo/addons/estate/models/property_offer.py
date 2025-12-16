@@ -58,6 +58,10 @@ class EstatePropertyOffer(models.Model):
 
     @api.depends("create_date", "validity")
     def _compute_date_deadline(self):
+        """
+        Calcula la fecha límite de la oferta sumando los días de validez
+        a la fecha de creación.
+        """
         for record in self:
             create_date = record.create_date or fields.Date.today()
             # Convertir a date si es datetime
@@ -66,6 +70,10 @@ class EstatePropertyOffer(models.Model):
             record.date_deadline = create_date + timedelta(days=record.validity)
 
     def _inverse_date_deadline(self):
+        """
+        Función inversa que recalcula los días de validez cuando se
+        modifica manualmente la fecha límite.
+        """
         for record in self:
             create_date = record.create_date or fields.Date.today()
             # Convertir a date si es datetime
@@ -74,6 +82,11 @@ class EstatePropertyOffer(models.Model):
             record.validity = (record.date_deadline - create_date).days
 
     def create(self, vals_list):
+        """
+        Sobrescribe el método create para:
+        - Validar que no se creen ofertas para propiedades canceladas
+        - Cambiar el estado de la propiedad a "offer_received" cuando recibe su primera oferta
+        """
         for vals in vals_list:
             if "property_id" in vals:
                 property_id = self.env["estate.property"].browse(vals["property_id"])
@@ -85,6 +98,13 @@ class EstatePropertyOffer(models.Model):
         return super().create(vals_list)
 
     def action_accept(self):
+        """
+        Acepta la oferta y realiza las siguientes acciones:
+        - Marca la oferta como aceptada
+        - Establece el comprador y precio de venta en la propiedad
+        - Cambia el estado de la propiedad a "sold"
+        - Rechaza automáticamente todas las otras ofertas
+        """
         for record in self:
             if record.property_id.state == "canceled":
                 raise UserError("Cannot accept an offer for a canceled property.")
@@ -100,9 +120,12 @@ class EstatePropertyOffer(models.Model):
         return True
 
     def action_refuse(self):
+        """
+        Rechaza la oferta.
+        Valida que la oferta no haya sido previamente aceptada.
+        """
         for record in self:
             if record.status == "accepted":
-                raise UserError("Accepted offers cannot be refused.")
                 raise UserError("Accepted offers cannot be refused.")
             record.status = "refused"
         return True

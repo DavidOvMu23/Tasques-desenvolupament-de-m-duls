@@ -33,6 +33,10 @@ class EstatePropertyType(models.Model):
 
     @api.depends("offer_ids")
     def _compute_offer_count(self):
+        """
+        Calcula el número de ofertas asociadas a este tipo de propiedad.
+        Se basa en la cantidad de registros en offer_ids.
+        """
         for record in self:
             record.offer_count = len(record.offer_ids)
 
