@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_estate_property_kanban" model="ir.ui.view">
+        <field name="name">estate.property.kanban</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="property_type_id" drag_create="false">
+                <field name="name"/>
+                <field name="expected_price"/>
+                <field name="best_price"/>
+                <field name="selling_price"/>
+                <field name="tag_ids"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_kanban_card">
+                            <strong><field name="name"/></strong>
+                            <div>
+                                <span>Precio esperado: </span>
+                                <field name="expected_price"/>
+                            </div>
+                            <div t-if="record.state.raw_value == 'offer_received'">
+                                <span>Mejor oferta: </span>
+                                <field name="best_price"/>
+                            </div>
+                            <div t-if="record.state.raw_value == 'sold'">
+                                <span>Precio de venta: </span>
+                                <field name="selling_price"/>
+                            </div>
+                            <div>
+                                <span>Etiquetas: </span>
+                                <field name="tag_ids" widget="many2many_tags"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="estate_property_kanban_action" model="ir.actions.act_window">
+        <field name="name">Properties</field>
+        <field name="res_model">estate.property</field>
+        <field name="view_mode">kanban,list,form</field>
+        <!-- Eliminar view_ids para que Odoo detecte automáticamente las vistas disponibles -->
+    </record>
+</odoo>

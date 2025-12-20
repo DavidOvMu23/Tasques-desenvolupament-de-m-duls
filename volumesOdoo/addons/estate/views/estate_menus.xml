@@ -10,7 +10,7 @@
         <!-- Submenu: Anuncios/Propiedades -->
         <menuitem id="adversiments" name="Advertisements">
             <!-- Opción para ver y gestionar propiedades (vinculada a la acción estate_property) -->
-            <menuitem id="propiedades" action="estate_property"/>
+            <menuitem id="propiedades" action="estate_property_kanban_action"/>
         </menuitem>
         
         <!-- Submenu: Configuración/Ajustes -->
