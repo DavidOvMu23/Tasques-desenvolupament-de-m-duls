@@ -1,1 +1,2 @@
-volumesOdoo/dataPostgreSQL
+# Ignorar la carpeta de datos de PostgreSQL
+volumesOdoo/dataPostgreSQL/
